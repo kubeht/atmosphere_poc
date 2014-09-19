@@ -10,10 +10,10 @@ import javax.annotation.PreDestroy;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.BroadcasterLifeCyclePolicy.ATMOSPHERE_RESOURCE_POLICY;
-import org.atmosphere.interceptor.HeartbeatInterceptor;
-import org.atmosphere.interceptor.IdleResourceInterceptor;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Nettosphere;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +26,18 @@ import com.me.amps.apps.MessageResource;
  */
 @Service
 public class ServiceFactory {
-
+	private final static Logger logger = LoggerFactory
+			.getLogger(ServiceFactory.class);
+	
     @Value("${port}")
     private int port;
 
+    @Value("${com.hightail.amps.plugin.hazelcast.HazelcastBroadcaster.enableHazelcastIntegration:false}")
+	private boolean enableHazelcastIntegration;
+    
+	@Value("${org.atmosphere.cpr.Broadcaster.broadcasterClass:}")
+	private String broadcasterClass;
+	
     private Nettosphere nettosphere;
 
     @PostConstruct
@@ -48,8 +56,14 @@ public class ServiceFactory {
                 // setup a 60 second for max idle time for IdleResourceInterceptor
                 .initParam(ApplicationConfig.MAX_INACTIVE, "60000")
                 // broadcaster policy
-                .initParam(ApplicationConfig.BROADCASTER_LIFECYCLE_POLICY, ATMOSPHERE_RESOURCE_POLICY.EMPTY.name())
-                .build();
+                .initParam(ApplicationConfig.BROADCASTER_LIFECYCLE_POLICY, ATMOSPHERE_RESOURCE_POLICY.EMPTY.name());
+        
+        logger.info("enableHazelcastIntegration={}", enableHazelcastIntegration);
+		if (enableHazelcastIntegration) {
+			b.initParam(ApplicationConfig.BROADCASTER_CLASS, broadcasterClass);
+		}
+
+                b.build();
         nettosphere = new Nettosphere.Builder().config(b.build()).build();
         nettosphere.start();
     }
