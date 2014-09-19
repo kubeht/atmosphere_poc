@@ -18,7 +18,12 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
-
+/**
+ * 
+ * modified from org.atmosphere.plugin.hazelcast.HazelcastBroadcaster 2.2.0
+ * @author ian.li
+ *
+ */
 public class HazelcastBroadcaster extends AbstractBroadcasterProxy {
     private static final Logger logger = LoggerFactory.getLogger(org.atmosphere.plugin.hazelcast.HazelcastBroadcaster.class);
     private ITopic<com.me.amps.domain.dto.Message> topic;
